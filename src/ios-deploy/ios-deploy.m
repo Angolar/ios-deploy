@@ -277,7 +277,7 @@ CFStringRef copy_xcode_path_for(CFStringRef subPath, CFStringRef search) {
     CFStringRef path = NULL;
     const char* home = get_home();
     
-    // Try using explicitly provided path8
+    // Try using explicitly provided path
     if (explicit_xcode_path != NULL)
         path = copy_xcode_path_for_impl(CFStringCreateWithCString(NULL, explicit_xcode_path, kCFStringEncodingUTF8), subPath, search);
     
@@ -1783,12 +1783,12 @@ int main(int argc, char *argv[]) {
         { "list_bundle_id", no_argument, NULL, 'B'},
         { "no-wifi", no_argument, NULL, 'W'},
         { "detect_deadlocks", required_argument, NULL, 1000 },
-        { "xcode_path", optional_argument, NULL, 'x' },
+        { "xcode_path", required_argument, NULL, 'x' },
         { NULL, 0, NULL, 0 },
     };
     int ch;
 
-    while ((ch = getopt_long(argc, argv, "VmcdvunrILeD:R:i:b:a:t:g:x:p:1:2:o:l::w::9::B::W", longopts, NULL)) != -1)
+    while ((ch = getopt_long(argc, argv, "VmcdvunrILeD:R:i:b:a:t:g:x:p:1:2:o:x:l::w::9::B::W", longopts, NULL)) != -1)
     {
         switch (ch) {
         case 'm':
