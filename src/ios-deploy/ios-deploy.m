@@ -87,6 +87,7 @@ char *app_path = NULL;
 char *device_id = NULL;
 char *args = NULL;
 char *list_root = NULL;
+char *explicit_xcode_path = NULL;
 int _timeout = 0;
 int _detectDeadlockTimeout = 0;
 int port = 0;    // 0 means "dynamically assigned"
@@ -276,8 +277,13 @@ CFStringRef copy_xcode_path_for(CFStringRef subPath, CFStringRef search) {
     CFStringRef path = NULL;
     const char* home = get_home();
     
+    // Try using explicitly provided path8
+    if (explicit_xcode_path != NULL)
+        path = copy_xcode_path_for_impl(CFStringCreateWithCString(NULL, explicit_xcode_path, kCFStringEncodingUTF8), subPath, search);
+    
     // Try using xcode-select --print-path
-    path = copy_xcode_path_for_impl(xcodeDevPath, subPath, search);
+    if (path == NULL)
+        path = copy_xcode_path_for_impl(xcodeDevPath, subPath, search);
     
     // If not look in the default xcode location (xcode-select is sometimes wrong)
     if (path == NULL && CFStringCompare(xcodeDevPath, defaultXcodeDevPath, 0) != kCFCompareEqualTo )
@@ -1730,7 +1736,8 @@ void usage(const char* app) {
         @"  -e, --exists                 check if the app with given bundle_id is installed or not \n"
         @"  -B, --list_bundle_id         list bundle_id \n"
         @"  -W, --no-wifi                ignore wifi devices\n"
-        @"  --detect_deadlocks <sec>     start printing backtraces for all threads periodically after specific amount of seconds\n",
+        @"  --detect_deadlocks <sec>     start printing backtraces for all threads periodically after specific amount of seconds\n"
+        @"  -x, --xcode_path             explicitly set path where xcode is located\n",
         [NSString stringWithUTF8String:app]);
 }
 
@@ -1776,6 +1783,7 @@ int main(int argc, char *argv[]) {
         { "list_bundle_id", no_argument, NULL, 'B'},
         { "no-wifi", no_argument, NULL, 'W'},
         { "detect_deadlocks", required_argument, NULL, 1000 },
+        { "xcode_path", optional_argument, NULL, 'x' },
         { NULL, 0, NULL, 0 },
     };
     int ch;
@@ -1881,6 +1889,9 @@ int main(int argc, char *argv[]) {
             break;
         case 1000:
             _detectDeadlockTimeout = atoi(optarg);
+            break;
+        case 'x':
+            explicit_xcode_path = optarg;
             break;
         default:
             usage(argv[0]);
